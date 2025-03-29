@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寶可夢卡片收藏家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#7879F1',
+                        accent: '#FFD600',
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .card-enter {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .page-transition {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* 自定義滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- 頂部導航欄 -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NzYuNzE0IDQ3Ni43MTQiPjxwYXRoIGZpbGw9IiM1RDVDREUiIGQ9Ik0yMzguMzU3IDAgQzEwNi43NTEgMCAwIDEwNi43NSAwIDIzOC4zNTdjMCAxMzEuNiAxMDYuNzUxIDIzOC4zNTcgMjM4LjM1NyAyMzguMzU3czIzOC4zNTctMTA2Ljc1NiAyMzguMzU3LTIzOC4zNTdDNDc2LjcxNCAxMDYuNzUgMzcwLjAwOSAwIDIzOC4zNTcgMHoiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMzgxLjY3MiAyMzguNzg4YzAtNzkuMTgtNjQuMTcxLTE0My4zNDktMTQzLjMyNS0xNDMuMzQ5LTc5LjE5MiAwLTE0My4zNSA2NC4xNjktMTQzLjM1IDE0My4zNDlzNjQuMTU3IDE0My4zNSAxNDMuMzUgMTQzLjM1YzI0LjY5MSAwIDQ3LjkyNC02LjIzMyA2OC4yMzYtMTcuMjE0YTI1LjgzNCAyNS44MzQgMCAwMC0yNC40MTItMTcuMzc3IDI1LjY5OCAyNS42OTggMCAwMC00LjU5NC40MDhsLS40NS4wODhhNS4xMiA1LjEyIDAgMDEtLjQ1Ny4wNCAxMC44MTMgMTAuODEzIDAgMTEtMTAuODI0LTEwLjgyNCAxMC44NTUgMTAuODU1IDAgMDE3LjU5MSAzLjA2MmMuMDYuMDU3LjEyNS4xMS4xODkuMTYzLjA4OC4wNzQuMTc4LjE0Ni4yNy4yMTRhMTAuODQ1IDEwLjg0NSAwIDAxMi43NjcgNy4zNzkgMjUuODQ4IDI1Ljg0OCAwIDAwMTcuMTgyIDI0LjM2OGMxMC45NzgtMjAuMzA0IDE3LjIyNy00My41NTMgMTcuMjI3LTY4LjIxN3oiLz48Y2lyY2xlIGZpbGw9IiNmZmYiIGN4PSIyMzguMzQ3IiBjeT0iMjM4Ljc3OSIgcj0iNTEuODE4Ii8+PGNpcmNsZSBmaWxsPSIjRkYwMDAwIiBjeD0iMjM4LjM0NyIgY3k9IjIzOC43NzkiIHI9IjI2LjE4Ii8+PC9zdmc+" alt="Logo" class="h-10 w-10">
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">寶可夢卡片收藏家</h1>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home" class="nav-link text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white font-medium">首頁</a>
+                    <a href="#inventory" class="nav-link text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white font-medium">卡片庫存</a>
+                    <a href="#stats" class="nav-link text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white font-medium">統計分析</a>
+                    <a href="#about" class="nav-link text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white font-medium">關於我們</a>
+                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- 手機版選單按鈕 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 dark:text-gray-300 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 手機版選單 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white dark:bg-gray-800 pb-4 shadow-lg">
+            <div class="container mx-auto px-4 flex flex-col space-y-3">
+                <a href="#home" class="mobile-nav-link py-2 text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">首頁</a>
+                <a href="#inventory" class="mobile-nav-link py-2 text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">卡片庫存</a>
+                <a href="#stats" class="mobile-nav-link py-2 text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">統計分析</a>
+                <a href="#about" class="mobile-nav-link py-2 text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">關於我們</a>
+                <div class="flex items-center">
+                    <span class="text-gray-600 dark:text-gray-300 mr-3">切換主題</span>
+                    <button id="mobile-theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區域 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 首頁 -->
+        <section id="home-page" class="page-section page-transition">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col-reverse md:flex-row md:items-center mb-12">
+                    <div class="md:w-1/2 mt-6 md:mt-0 md:pr-8">
+                        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">歡迎使用寶可夢卡片收藏家</h2>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">追蹤、管理和分析您的寶可夢卡片收藏，輕鬆掌握您的收藏價值和稀有程度。</p>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="#inventory" class="btn-primary bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-md transition-colors">管理卡片</a>
+                            <a href="#stats" class="btn-secondary bg-white dark:bg-gray-800 text-primary dark:text-secondary border border-primary dark:border-secondary px-5 py-2 rounded-md transition-colors">查看統計</a>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MDAgNTAwIj48cGF0aCBmaWxsPSIjNUQ1Q0RFIiBkPSJNNDU2LjMgNTBIMzRDMjYuOSA1MCAyMSA1NS45IDIxIDYzVjM3M0MyMSAzODAuMSAyNi45IDM4NiAzNCAzODZINDU2LjNDNDYzLjQgMzg2IDQ2OS4zIDM4MC4xIDQ2OS4zIDM3M1Y2M0M0NjkuMyA1NS45IDQ2My40IDUwIDQ1Ni4zIDUwWiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik04My45IDEyNC41SDM5Ni44QzQwMi4zIDEyNC41IDQwNi44IDEyOSA0MDYuOCAxMzQuNVYzMDFDNDA2LjggMzA2LjUgNDAyLjMgMzExIDM5Ni44IDMxMUg4My45Qzc4LjQgMzExIDczLjkgMzA2LjUgNzMuOSAzMDFWMTM0LjVDNzMuOSAxMjkgNzguNCAxMjQuNSA4My45IDEyNC41WiIvPjxwYXRoIGZpbGw9IiM1RDVDREUiIGQ9Ik03Ny44IDIxOEg0MDIuOFYyMThINzcuOFoiLz48cGF0aCBmaWxsPSIjNUQ1Q0RFIiBkPSJNMjI5LjMgMzYyLjdIMjQwLjlDMjQ2LjkgMzYyLjcgMjUxLjkgMzY3LjcgMjUxLjkgMzczLjdWNDUwSDIxOC4zVjM3My43QzIxOC4zIDM2Ny43IDIyMy4yIDM2Mi43IDIyOS4zIDM2Mi43WiIvPjxwYXRoIGZpbGw9IiNGRkQwMDAiIGQ9Ik0yMjEuNSAxNTguNUMyMjEuNSAxMzMuNCAyNDEuOSAxMTMgMjY3IDExM0MyOTIuMSAxMTMgMzEyLjUgMTMzLjQgMzEyLjUgMTU4LjVDMzEyLjUgMTgzLjYgMjkyLjEgMjA0IDI2NyAyMDRDMjQxLjkgMjA0IDIyMS41IDE4My42IDIyMS41IDE1OC41WiIvPjxwYXRoIGZpbGw9IiNGRkQwMDAiIGQ9Ik0xNjQuMSAyNzEuNkMxNjQuMSAyNDYuNSAxODQuNSAyMjYuMSAyMDkuNiAyMjYuMUMyMzQuNyAyMjYuMSAyNTUuMSAyNDYuNSAyNTUuMSAyNzEuNkMyNTUuMSAyOTYuNyAyMzQuNyAzMTcuMSAyMDkuNiAzMTcuMUMxODQuNSAzMTcuMSAxNjQuMSAyOTYuNyAxNjQuMSAyNzEuNloiLz48cGF0aCBmaWxsPSIjRkZEMDAwIiBkPSJNMjc4LjkgMjcxLjZDMjc4LjkgMjQ2LjUgMjk5LjMgMjI2LjEgMzI0LjQgMjI2LjFDMzQ5LjUgMjI2LjEgMzY5LjkgMjQ2LjUgMzY5LjkgMjcxLjZDMzY5LjkgMjk2LjcgMzQ5LjUgMzE3LjEgMzI0LjQgMzE3LjFDMjk5LjMgMzE3LjEgMjc4LjkgMjk2LjcgMjc4LjkgMjcxLjZaIi8+PHBhdGggZmlsbD0iI0ZGMDI1NyIgZD0iTTI0MS44IDI1MC4xSDIzOS43TDIxMyAyNTAuMUMyMDkuNSAyNTAuMSAyMDYuNyAyNTIuOSAyMDYuNyAyNTYuNFYyNTguNUMyMDYuNyAyNjIgMjA5LjUgMjY0LjggMjEzIDI2NC44SDIzOS43SDI0MS44SDI2OC41QzI3MiAyNjQuOCAyNzQuOCAyNjIgMjc0LjggMjU4LjVWMjU2LjRDMjc0LjggMjUyLjkgMjcyIDI1MC4xIDI2OC41IDI1MC4xSDI0MS44WiIvPjxwYXRoIGZpbGw9IiNGRjAyNTciIGQ9Ik0yNTEuMyAxNzIuOUgyNDkuMkgyMTIuOEMyMDkuMyAxNzIuOSAyMDYuNSAxNzUuNyAyMDYuNSAxNzkuMlYxODEuM0MyMDYuNSAxODQuOCAyMDkuMyAxODcuNiAyMTIuOCAxODcuNkgyNDkuMkgyNTEuM0gyODcuN0MyOTEuMiAxODcuNiAyOTQgMTg0LjggMjk0IDE4MS4zVjE3OS4yQzI5NCAxNzUuNyAyOTEuMiAxNzIuOSAyODcuNyAxNzIuOUgyNTEuM1oiLz48L3N2Zz4=" alt="Pokemon Card Collector" class="w-full h-auto rounded-lg shadow-lg">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">追蹤收藏</h3>
+                        <p class="text-gray-600 dark:text-gray-300">輕鬆記錄您的寶可夢卡片，包括名稱、系列、稀有度、價格和數量。</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">數據分析</h3>
+                        <p class="text-gray-600 dark:text-gray-300">查看收藏統計和分析，了解您的卡片分布和總體價值。</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">安全存儲</h3>
+                        <p class="text-gray-600 dark:text-gray-300">您的收藏數據安全存儲，可以隨時存取和更新。</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">快速開始</h3>
+                    <ol class="list-decimal list-inside space-y-3 text-gray-600 dark:text-gray-300">
+                        <li>前往<a href="#inventory" class="text-primary hover:underline">卡片庫存</a>頁面</li>
+                        <li>填寫新卡片的詳細信息，包括名稱、系列、稀有度、價格和數量</li>
+                        <li>點擊"新增卡片"按鈕將其添加到您的收藏中</li>
+                        <li>使用增減按鈕快速調整卡片數量</li>
+                        <li>隨時編輯或刪除卡片信息</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- 庫存頁面 -->
+        <section id="inventory-page" class="page-section page-transition hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">卡片庫存管理</h2>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">新增卡片</h3>
+                    <form id="add-card-form" class="space-y-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="pokemon-name" class="block text-gray-700 dark:text-gray-300 mb-1">寶可夢名稱</label>
+                                <input type="text" id="pokemon-name" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" required placeholder="例如：皮卡丘">
+                            </div>
+                            <div>
+                                <label for="card-set" class="block text-gray-700 dark:text-gray-300 mb-1">卡片系列（選填）</label>
+                                <input type="text" id="card-set" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" placeholder="例如：基本系列">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div>
+                                <label for="card-rarity" class="block text-gray-700 dark:text-gray-300 mb-1">稀有度（選填）</label>
+                                <select id="card-rarity" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                                    <option value="">選擇稀有度</option>
+                                    <option value="普通">普通</option>
+                                    <option value="非普通">非普通</option>
+                                    <option value="稀有">稀有</option>
+                                    <option value="閃卡稀有">閃卡稀有</option>
+                                    <option value="極稀有">極稀有</option>
+                                    <option value="秘密稀有">秘密稀有</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="card-price" class="block text-gray-700 dark:text-gray-300 mb-1">價格（選填）</label>
+                                <input type="number" id="card-price" min="0" step="0.01" placeholder="0.00" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="card-quantity" class="block text-gray-700 dark:text-gray-300 mb-1">數量</label>
+                                <input type="number" id="card-quantity" min="1" value="1" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" required>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                新增卡片
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="mb-4">
+                    <input type="text" id="card-search" placeholder="搜尋卡片..." class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                </div>
+
+                <div id="no-cards-message" class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">您尚未新增任何卡片。</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">使用上方表單新增您的第一張卡片。</p>
+                </div>
+                <div id="card-list" class="hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">寶可夢</th>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">系列</th>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">稀有度</th>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">價格</th>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">數量</th>
+                                        <th class="px-6 py-3 text-gray-700 dark:text-gray-300 font-semibold">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="card-table-body">
+                                    <!-- Cards will be added here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 統計頁面 -->
+        <section id="stats-page" class="page-section page-transition hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">收藏統計分析</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">總卡片數</h3>
+                        <p id="total-cards" class="text-4xl font-bold text-primary">0</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">獨特卡片</h3>
+                        <p id="unique-cards" class="text-4xl font-bold text-primary">0</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">總價值</h3>
+                        <p id="total-value" class="text-4xl font-bold text-primary">$0.00</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">稀有度分布</h3>
+                        <div id="rarity-chart" class="h-60">
+                            <div id="no-rarity-data" class="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                <p>尚無卡片數據可供分析</p>
+                            </div>
+                            <div id="rarity-bars" class="hidden h-full flex flex-col justify-end space-y-2">
+                                <!-- Rarity bars will be added here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">最有價值的卡片</h3>
+                        <div id="top-cards" class="space-y-3">
+                            <div id="no-value-data" class="text-gray-500 dark:text-gray-400">
+                                <p>尚無卡片價格數據可供分析</p>
+                            </div>
+                            <ul id="value-list" class="hidden">
+                                <!-- Top value cards will be added here by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 關於頁面 -->
+        <section id="about-page" class="page-section page-transition hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">關於我們</h2>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">寶可夢卡片收藏家</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        寶可夢卡片收藏家是一個為寶可夢卡片愛好者和收藏家設計的網站應用。我們的目標是提供簡單而強大的工具，幫助您追蹤、管理和分析您的寶可夢卡片收藏。
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        無論您是剛開始收集寶可夢卡片，還是已經擁有龐大的收藏，我們的應用都能幫助您更好地組織和了解您的收藏。
+                    </p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">功能特點</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                        <li>輕鬆添加和管理卡片</li>
+                        <li>記錄卡片詳細信息，包括名稱、系列、稀有度、價格和數量</li>
+                        <li>快速搜尋功能</li>
+                        <li>實時統計和分析</li>
+                        <li>支持深色和淺色主題</li>
+                        <li>響應式設計，適合所有設備</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">聯繫我們</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        有任何問題、建議或反饋嗎？我們很樂意聽取您的意見！
+                    </p>
+                    <a href="#" class="text-primary hover:underline">傳送訊息</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 頁腳 -->
+    <footer class="bg-white dark:bg-gray-800 py-6 mt-12 border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">寶可夢卡片收藏家</h2>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">為您的卡片收藏提供專業管理</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0">
+                    <a href="#home" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">首頁</a>
+                    <a href="#inventory" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">卡片庫存</a>
+                    <a href="#stats" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">統計分析</a>
+                    <a href="#about" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white">關於我們</a>
+                </div>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-gray-500 dark:text-gray-400 text-center text-sm">&copy; 2023 寶可夢卡片收藏家。保留所有權利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for editing card -->
+    <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="modal-overlay"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md relative z-10 fade-in mx-4">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">編輯卡片</h3>
+            <form id="edit-card-form" class="space-y-4">
+                <input type="hidden" id="edit-card-id">
+                <div>
+                    <label for="edit-pokemon-name" class="block text-gray-700 dark:text-gray-300 mb-1">寶可夢名稱</label>
+                    <input type="text" id="edit-pokemon-name" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" required>
+                </div>
+                <div>
+                    <label for="edit-card-set" class="block text-gray-700 dark:text-gray-300 mb-1">卡片系列</label>
+                    <input type="text" id="edit-card-set" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="edit-card-rarity" class="block text-gray-700 dark:text-gray-300 mb-1">稀有度</label>
+                    <select id="edit-card-rarity" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                        <option value="">選擇稀有度</option>
+                        <option value="普通">普通</option>
+                        <option value="非普通">非普通</option>
+                        <option value="稀有">稀有</option>
+                        <option value="閃卡稀有">閃卡稀有</option>
+                        <option value="極稀有">極稀有</option>
+                        <option value="秘密稀有">秘密稀有</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="edit-card-price" class="block text-gray-700 dark:text-gray-300 mb-1">價格</label>
+                    <input type="number" id="edit-card-price" min="0" step="0.01" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="edit-card-quantity" class="block text-gray-700 dark:text-gray-300 mb-1">數量</label>
+                    <input type="number" id="edit-card-quantity" min="1" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" required>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-edit" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        取消
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition-colors">
+                        儲存變更
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Dark mode toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+        
+        // Mobile dark mode toggle
+        document.getElementById('mobile-theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        
+        // Router functionality
+        function navigateTo(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                
+                // Update active state in navigation
+                document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+                    if (link.getAttribute('href') === '#' + pageId) {
+                        link.classList.add('text-primary', 'font-semibold');
+                        link.classList.remove('text-gray-600', 'dark:text-gray-300');
+                    } else {
+                        link.classList.remove('text-primary', 'font-semibold');
+                        link.classList.add('text-gray-600', 'dark:text-gray-300');
+                    }
+                });
+                
+                // Close mobile menu after navigation
+                document.getElementById('mobile-menu').classList.add('hidden');
+                
+                // Update hash
+                window.location.hash = pageId;
+                
+                // Update statistics if on stats page
+                if (pageId === 'stats') {
+                    updateStatistics();
+                }
+            }
+        }
+        
+        // Handle navigation links
+        document.querySelectorAll('.nav-link, .mobile-nav-link, .btn-primary, .btn-secondary, footer a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageId = link.getAttribute('href').substring(1); // Remove the # character
+                navigateTo(pageId);
+            });
+        });
+        
+        // Handle hash change (browser back/forward)
+        window.addEventListener('hashchange', () => {
+            const pageId = window.location.hash.substring(1) || 'home';
+            navigateTo(pageId);
+        });
+        
+        // Navigate to initial page
+        const initialPageId = window.location.hash.substring(1) || 'home';
+        navigateTo(initialPageId);
+
+        // Card inventory data
+        let cardInventory = [];
+        let nextId = 1;
+
+        // DOM elements
+        const addCardForm = document.getElementById('add-card-form');
+        const cardList = document.getElementById('card-list');
+        const noCardsMessage = document.getElementById('no-cards-message');
+        const cardTableBody = document.getElementById('card-table-body');
+        const editModal = document.getElementById('edit-modal');
+        const editCardForm = document.getElementById('edit-card-form');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardSearch = document.getElementById('card-search');
+
+        // Add card to inventory
+        addCardForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const pokemonName = document.getElementById('pokemon-name').value.trim();
+            const cardSet = document.getElementById('card-set').value.trim();
+            const cardRarity = document.getElementById('card-rarity').value;
+            const cardPrice = document.getElementById('card-price').value.trim() 
+                ? parseFloat(document.getElementById('card-price').value) 
+                : null;
+            const cardQuantity = parseInt(document.getElementById('card-quantity').value);
+            
+            if (!pokemonName) {
+                return;
+            }
+            
+            const newCard = {
+                id: nextId++,
+                name: pokemonName,
+                set: cardSet,
+                rarity: cardRarity,
+                price: cardPrice,
+                quantity: cardQuantity
+            };
+            
+            cardInventory.push(newCard);
+            updateCardDisplay();
+            addCardForm.reset();
+            document.getElementById('card-quantity').value = 1;
+            
+            // Focus back on Pokemon name field for quick entry
+            document.getElementById('pokemon-name').focus();
+            
+            // Update statistics if available
+            updateStatistics();
+        });
+
+        // Search functionality
+        cardSearch.addEventListener('input', () => {
+            updateCardDisplay();
+        });
+
+        // Update the card display
+        function updateCardDisplay() {
+            const searchTerm = cardSearch.value.toLowerCase().trim();
+            
+            const filteredCards = searchTerm 
+                ? cardInventory.filter(card => 
+                    card.name.toLowerCase().includes(searchTerm) || 
+                    (card.set && card.set.toLowerCase().includes(searchTerm)) ||
+                    (card.rarity && card.rarity.toLowerCase().includes(searchTerm))
+                )
+                : cardInventory;
+            
+            if (filteredCards.length === 0) {
+                cardList.classList.add('hidden');
+                noCardsMessage.classList.remove('hidden');
+                
+                if (searchTerm && cardInventory.length > 0) {
+                    noCardsMessage.innerHTML = `
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">沒有找到符合 "${searchTerm}" 的卡片。</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">嘗試使用不同的搜尋詞</p>
+                    `;
+                } else {
+                    noCardsMessage.innerHTML = `
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">您尚未新增任何卡片。</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">使用上方表單新增您的第一張卡片。</p>
+                    `;
+                }
+                
+                return;
+            }
+            
+            cardList.classList.remove('hidden');
+            noCardsMessage.classList.add('hidden');
+            
+            cardTableBody.innerHTML = '';
+            
+            filteredCards.forEach(card => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 dark:border-gray-700 card-enter';
+                row.setAttribute('data-id', card.id);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-gray-800 dark:text-gray-300">${card.name}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-gray-300">${card.set || '-'}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-gray-300">${card.rarity || '-'}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-gray-300">${card.price !== null ? `$${card.price.toFixed(2)}` : '-'}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-gray-300">
+                        <div class="flex items-center space-x-2">
+                            <button class="decrement-btn p-1 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                </svg>
+                            </button>
+                            <span>${card.quantity}</span>
+                            <button class="increment-btn p-1 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <button class="edit-btn text-primary hover:text-primary-dark">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15.9l-3.282.707.707-3.283 8.332-8.331z" />
+                                </svg>
+                            </button>
+                            <button class="delete-btn text-red-500 hover:text-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                cardTableBody.appendChild(row);
+            });
+            
+            // Add event listeners
+            addTableButtonListeners();
+        }
+
+        // Add event listeners to table buttons
+        function addTableButtonListeners() {
+            // Increment buttons
+            document.querySelectorAll('.increment-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    const id = parseInt(row.getAttribute('data-id'));
+                    const card = cardInventory.find(c => c.id === id);
+                    if (card) {
+                        card.quantity += 1;
+                        row.querySelector('td:nth-child(5) span').textContent = card.quantity;
+                        updateStatistics();
+                    }
+                });
+            });
+            
+            // Decrement buttons
+            document.querySelectorAll('.decrement-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    const id = parseInt(row.getAttribute('data-id'));
+                    const card = cardInventory.find(c => c.id === id);
+                    if (card && card.quantity > 1) {
+                        card.quantity -= 1;
+                        row.querySelector('td:nth-child(5) span').textContent = card.quantity;
+                        updateStatistics();
+                    }
+                });
+            });
+            
+            // Edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    const id = parseInt(row.getAttribute('data-id'));
+                    const card = cardInventory.find(c => c.id === id);
+                    
+                    if (card) {
+                        document.getElementById('edit-card-id').value = card.id;
+                        document.getElementById('edit-pokemon-name').value = card.name;
+                        document.getElementById('edit-card-set').value = card.set || '';
+                        document.getElementById('edit-card-rarity').value = card.rarity || '';
+                        document.getElementById('edit-card-price').value = card.price !== null ? card.price : '';
+                        document.getElementById('edit-card-quantity').value = card.quantity;
+                        
+                        editModal.classList.remove('hidden');
+                    }
+                });
+            });
+            
+            // Delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    const id = parseInt(row.getAttribute('data-id'));
+                    
+                    cardInventory = cardInventory.filter(card => card.id !== id);
+                    updateCardDisplay();
+                    updateStatistics();
+                });
+            });
+        }
+
+        // Close modal when clicking outside
+        modalOverlay.addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        // Cancel edit button
+        document.getElementById('cancel-edit').addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        // Edit card form submission
+        editCardForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = parseInt(document.getElementById('edit-card-id').value);
+            const card = cardInventory.find(c => c.id === id);
+            
+            if (card) {
+                card.name = document.getElementById('edit-pokemon-name').value.trim();
+                card.set = document.getElementById('edit-card-set').value.trim();
+                card.rarity = document.getElementById('edit-card-rarity').value;
+                card.price = document.getElementById('edit-card-price').value.trim() 
+                    ? parseFloat(document.getElementById('edit-card-price').value) 
+                    : null;
+                card.quantity = parseInt(document.getElementById('edit-card-quantity').value);
+                
+                updateCardDisplay();
+                updateStatistics();
+                editModal.classList.add('hidden');
+            }
+        });
+        
+        // Statistics functionality
+        function updateStatistics() {
+            // Calculate statistics
+            const totalCards = cardInventory.reduce((total, card) => total + card.quantity, 0);
+            const uniqueCards = cardInventory.length;
+            const totalValue = cardInventory.reduce((total, card) => {
+                if (card.price !== null) {
+                    return total + (card.price * card.quantity);
+                }
+                return total;
+            }, 0);
+            
+            // Update statistics display
+            document.getElementById('total-cards').textContent = totalCards;
+            document.getElementById('unique-cards').textContent = uniqueCards;
+            document.getElementById('total-value').textContent = `$${totalValue.toFixed(2)}`;
+            
+            // Update rarity chart
+            updateRarityChart();
+            
+            // Update top value cards
+            updateTopValueCards();
+        }
+        
+        function updateRarityChart() {
+            const rarityBars = document.getElementById('rarity-bars');
+            const noRarityData = document.getElementById('no-rarity-data');
+            
+            // Collect rarity data
+            const rarityCount = {};
+            cardInventory.forEach(card => {
+                if (card.rarity) {
+                    rarityCount[card.rarity] = (rarityCount[card.rarity] || 0) + card.quantity;
+                } else {
+                    rarityCount['未指定'] = (rarityCount['未指定'] || 0) + card.quantity;
+                }
+            });
+            
+            // Check if there's data to display
+            if (Object.keys(rarityCount).length === 0) {
+                rarityBars.classList.add('hidden');
+                noRarityData.classList.remove('hidden');
+                return;
+            }
+            
+            // Show chart and hide no data message
+            rarityBars.classList.remove('hidden');
+            noRarityData.classList.add('hidden');
+            
+            // Clear previous bars
+            rarityBars.innerHTML = '';
+            
+            // Get the maximum count for scaling
+            const maxCount = Math.max(...Object.values(rarityCount));
+            
+            // Create color mapping
+            const colorMap = {
+                '普通': 'bg-gray-400',
+                '非普通': 'bg-blue-400',
+                '稀有': 'bg-green-400',
+                '閃卡稀有': 'bg-yellow-400',
+                '極稀有': 'bg-purple-400',
+                '秘密稀有': 'bg-red-400',
+                '未指定': 'bg-gray-300'
+            };
+            
+            // Add bars for each rarity
+            Object.entries(rarityCount).forEach(([rarity, count]) => {
+                const percentage = Math.max((count / maxCount) * 100, 10); // Min 10% height for visibility
+                const color = colorMap[rarity] || 'bg-gray-300';
+                
+                const bar = document.createElement('div');
+                bar.className = 'flex items-end';
+                bar.innerHTML = `
+                    <div class="text-xs text-gray-600 dark:text-gray-400 w-20 pr-2 text-right">${rarity}</div>
+                    <div class="flex-1 flex items-end">
+                        <div class="relative ${color} rounded-t" style="height: ${percentage}%;">
+                            <span class="absolute -top-6 left-2 text-xs text-gray-600 dark:text-gray-400">${count}</span>
+                        </div>
+                    </div>
+                `;
+                
+                rarityBars.appendChild(bar);
+            });
+        }
+        
+        function updateTopValueCards() {
+            const valueList = document.getElementById('value-list');
+            const noValueData = document.getElementById('no-value-data');
+            
+            // Filter cards with price
+            const cardsWithPrice = cardInventory.filter(card => card.price !== null);
+            
+            // Check if there's data to display
+            if (cardsWithPrice.length === 0) {
+                valueList.classList.add('hidden');
+                noValueData.classList.remove('hidden');
+                return;
+            }
+            
+            // Show list and hide no data message
+            valueList.classList.remove('hidden');
+            noValueData.classList.add('hidden');
+            
+            // Clear previous list
+            valueList.innerHTML = '';
+            
+            // Sort by total value (price * quantity)
+            const sortedCards = [...cardsWithPrice].sort((a, b) => {
+                return (b.price * b.quantity) - (a.price * a.quantity);
+            });
+            
+            // Display top 5 cards
+            const topCards = sortedCards.slice(0, 5);
+            topCards.forEach(card => {
+                const totalValue = card.price * card.quantity;
+                const listItem = document.createElement('li');
+                listItem.className = 'py-2 border-b border-gray-200 dark:border-gray-700 flex justify-between';
+                listItem.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-800 dark:text-white">${card.name}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">${card.set || ''} ${card.rarity ? `(${card.rarity})` : ''}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-primary">$${totalValue.toFixed(2)}</span>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">$${card.price.toFixed(2)} × ${card.quantity}</div>
+                    </div>
+                `;
+                
+                valueList.appendChild(listItem);
+            });
+        }
+        
+        // Initial statistics update
+        updateStatistics();
+    </script>
+</body>
+</html>
